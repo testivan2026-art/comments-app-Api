@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import commentRoutes from './routes/commentRoutes.js';
 import fileRoutes from './routes/fileRoutes.js';
 import userRoutes from './routes/userRoutes.js';
@@ -6,15 +7,23 @@ import { setupSwagger } from './swagger.js';
 
 const app = express();
 
+// --- CORS ---
+app.use(cors({
+  origin: 'http://localhost:3001', 
+  methods: ['GET','POST','PUT','DELETE'],
+  credentials: true // якщо використовуєш кукі/сесії
+}));
+
+// --- Body parser ---
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Роутери
+// --- Роутери ---
 app.use('/comments', commentRoutes);
 app.use('/files', fileRoutes);
 app.use('/users', userRoutes);
 
-// Swagger
+// --- Swagger ---
 setupSwagger(app);
 
 export default app;
