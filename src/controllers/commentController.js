@@ -73,24 +73,31 @@ export const createComment = async (req, res) => {
  */
 export const getComments = async (req, res) => {
   try {
-    const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 25;
-    const offset = (page - 1) * limit;
+    const page = Number(req.query.page ?? 1)
+
+    // Перевірка валідності
+    if (!Number.isInteger(page) || page < 1) {
+      return res.status(400).json({
+        message: 'Invalid page parameter',
+      })
+    }
+
+    const limit = Number(req.query.limit) || 25
+    const offset = (page - 1) * limit
 
     const sortBy = req.query.sortBy || 'date'; // 'date' | 'username' | 'email'
-    const order = req.query.order === 'ASC' ? 'ASC' : 'DESC';
+    const order = req.query.order === 'ASC' ? 'ASC' : 'DESC'
 
-    // Побудова order для Sequelize
-    let orderOption;
+    let orderOption
     switch (sortBy) {
       case 'username':
-        orderOption = [[User, 'username', order]];
-        break;
+        orderOption = [[User, 'username', order]]
+        break
       case 'email':
-        orderOption = [[User, 'email', order]];
-        break;
+        orderOption = [[User, 'email', order]]
+        break
       default:
-        orderOption = [['created_at', order]]; // за датою
+        orderOption = [['created_at', order]]
     }
 
     const { count, rows } = await Comment.findAndCountAll({
@@ -110,19 +117,18 @@ export const getComments = async (req, res) => {
           ],
         },
       ],
-    });
+    })
 
     res.json({
       total: count,
       page,
       totalPages: Math.ceil(count / limit),
       comments: rows,
-    });
+    })
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message })
   }
-};
-
+}
 /**
  * READ single comment by id
  */

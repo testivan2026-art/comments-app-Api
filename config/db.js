@@ -3,10 +3,17 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-export const sequelize = new Sequelize("comments_app", "nodeuser", "123456789!", {
-  host: "localhost",
-  dialect: "mariadb",
-});
+export const sequelize = new Sequelize(
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
+  {
+    host: process.env.DB_HOST, // ← mariadb
+    port: process.env.DB_PORT || 3306,
+    dialect: "mariadb",
+    logging: false,
+  }
+);
 
 export const testConnection = async () => {
   try {
@@ -14,5 +21,6 @@ export const testConnection = async () => {
     console.log("✅ DB connection OK");
   } catch (error) {
     console.error("❌ DB connection failed:", error);
+    throw error; 
   }
 };
