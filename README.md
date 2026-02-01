@@ -1,7 +1,6 @@
 # 💬 Comments App API
 
-REST API for SPA application that allows users to create threaded comments
-with file attachments, captcha validation and HTML sanitization.
+REST API для SPA додатку, який дозволяє створювати ниткоподібні коментарі з можливістю прикріплення файлів, CAPTCHA валідації та HTML санітизації.
 
 ---
 
@@ -12,8 +11,8 @@ with file attachments, captcha validation and HTML sanitization.
 - **Sequelize ORM**
 - **MariaDB**
 - **Swagger (OpenAPI)**
-- **Multer** (file uploads)
-- **Zod / express-validator** (validation)
+- **Multer** (для завантаження файлів)
+- **Zod / express-validator** (валідація)
 - **Docker / Docker Compose**
 
 ---
@@ -56,39 +55,38 @@ src/
 ├─ app.js
 └─ swagger.js
 uploads/
-├─ pngtree-snow-leopard-1769702092416.jpg
+├─ example-file.jpg
 package.json
 package-lock.json
 server.js
 README.md
 
-
 ---
 
 ## 🗄 Database Schema
 
-Entities:
+**Сутності:**
 - **User**
 - **Comment**
 - **File**
 
-Relations:
-- User → has many Comments
-- Comment → has many Files
+**Відношення:**
+- User → має багато Comments
+- Comment → має багато Files
 - Comment → self-referenced (parent_id)
 
-> Файл ERD для MySQL Workbench: [docs/shema.mwb](docs/shema.mwb)  
-> Рекомендовано додати PNG експорт схеми для швидкого перегляду.
+> ERD схема для MySQL Workbench: [docs/shema.mwb]  
+> Рекомендовано також зробити PNG експорт для швидкого перегляду.
 
 ---
 
 ## 🔐 Security
 
-- SQL Injection protection via Sequelize ORM
-- XSS protection via HTML sanitization
-- Server-side & client-side validation
-- File type & size validation (images: JPG, PNG, GIF; text: TXT ≤100KB)
-- CAPTCHA validation
+- SQL Injection захист через Sequelize ORM
+- XSS захист через HTML санітизацію
+- Валідація на сервері та клієнті
+- Валідація типу та розміру файлів (JPG, PNG, GIF; TXT ≤100KB)
+- CAPTCHA валідація (серверна заглушка)
 
 ---
 
@@ -98,7 +96,7 @@ Relations:
 
 [http://localhost:3000/api-docs](http://localhost:3000/api-docs)
 
-Swagger документує всі маршрути:
+Маршрути:
 
 - `GET /comments` — отримати всі кореневі коментарі (пагінація, сортування)
 - `GET /comments/:id` — отримати конкретний коментар
@@ -107,17 +105,37 @@ Swagger документує всі маршрути:
 - `PATCH /comments/:id` — оновити текст коментаря
 - `DELETE /comments/:id` — видалити коментар
 
----
+**Приклад відповіді (GET /comments):**
+```json
+{
+  "total": 1,
+  "page": 1,
+  "totalPages": 1,
+  "comments": [
+    {
+      "id": 1,
+      "text": "Hello world!",
+      "user": {
+        "id": 1,
+        "username": "Ivan123",
+        "email": "ivan@test.com"
+      },
+      "files": [],
+      "replies": [],
+      "created_at": "2026-02-01T12:00:00Z"
+    }
+  ]
+}
 
-## ▶️ Run Project
-
-### 🐳 With Docker (recommended)
-```bash
+Run Project
+🐳 With Docker (recommended)
 # 1. Build & start containers
 docker compose up --build -d
 
+
 # 2. Check logs
 docker compose logs -f
+
 
 # 3. Stop containers
 docker compose down
@@ -137,13 +155,18 @@ PORT=3000
 
 
 # 3. Start server
+npm start
+# або
 node server.js
 
-Example API Requests
+Example API Request
 
 Create Comment:
 
 POST /comments
+Content-Type: application/json
+
+
 {
   "username": "Ivan123",
   "email": "ivan@test.com",
@@ -153,7 +176,7 @@ POST /comments
   "captcha": "A1b2"
 }
 
-Implemented Features
+Implemented Features:
 
 Threaded comments (parent / replies)
 
@@ -163,7 +186,7 @@ File upload (images / text)
 
 Image resize to 320x240 px
 
-CAPTCHA validation
+CAPTCHA validation (server stub)
 
 Swagger documentation
 
@@ -175,8 +198,4 @@ Notes
 
 Для перегляду схеми використовуйте docs/shema.mwb у MySQL Workbench.
 
-Docker повністю сумісний з бекендом і піднімає:
-
-MariaDB
-
-API сервіс
+Docker піднімає MariaDB + API сервіс і повністю сумісний з бекендом.
