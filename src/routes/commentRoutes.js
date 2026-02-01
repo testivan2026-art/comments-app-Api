@@ -1,4 +1,4 @@
-import express from 'express';
+import express from 'express'
 import {
   createComment,
   getComments,
@@ -6,87 +6,62 @@ import {
   updateComment,
   deleteComment,
   getCommentFiles
-} from '../controllers/commentController.js';
+} from '../controllers/commentController.js'
 
-import { createCommentSchema, updateCommentSchema } from '../validators/commentSchema.js';
-import { validateZod } from '../middlewares/validateZod.js';
-import { sanitizeText } from '../middlewares/sanitize.js';
-import { checkCaptcha } from '../middlewares/captcha.js';
-import { upload } from '../middlewares/upload.js';
+import { createCommentSchema, updateCommentSchema } from '../validators/commentSchema.js'
+import { validateZod } from '../middlewares/validateZod.js'
+import { sanitizeText } from '../middlewares/sanitize.js'
+import { checkCaptcha } from '../middlewares/captcha.js'
+import { upload } from '../middlewares/upload.js'
 
-const router = express.Router();
+const router = express.Router()
 
-/**
- * @swagger
- * /comments:
- *   get:
- *     summary: Get all root comments
- *     description: Returns paginated root comments with users and files.
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *         description: Page number
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *         description: Number of comments per page
- *       - in: query
- *         name: order
- *         schema:
- *           type: string
- *           enum: [ASC, DESC]
- *         description: Sort order by creation date
- *     responses:
- *       200:
- *         description: List of comments
- */
-router.get('/', getComments);
-
-/**
- * @swagger
- * /comments/{id}/files:
- *   get:
- *     summary: Get files for a comment
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: Comment ID
- *     responses:
- *       200:
- *         description: List of files for the comment
- */
-router.get('/:id/files', getCommentFiles);
-
-/**
- * @swagger
- * /comments/{id}:
- *   get:
- *     summary: Get a single comment by ID
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Comment object
- *       404:
- *         description: Comment not found
- */
-router.get('/:id', getComment);
+// ---------- READ ----------
+router.get('/', getComments)
+router.get('/:id', getComment)
+router.get('/:id/files', getCommentFiles)
 
 /**
  * @swagger
  * /comments:
  *   post:
- *     summary: Create a new comment
+ *     summary: Create a new comment (JSON)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               text:
+ *                 type: string
+ *               parent_id:
+ *                 type: integer
+ *               captcha:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Comment created
+ *       400:
+ *         description: Validation error
+ */
+router.post(
+  '/',
+  validateZod(createCommentSchema),
+  checkCaptcha,
+  sanitizeText,
+  createComment
+)
+
+/**
+ * @swagger
+ * /comments/with-file:
+ *   post:
+ *     summary: Create a new comment with a file (multipart)
  *     requestBody:
  *       required: true
  *       content:
@@ -97,8 +72,6 @@ router.get('/:id', getComment);
  *               username:
  *                 type: string
  *               email:
- *                 type: string
- *               homepage:
  *                 type: string
  *               text:
  *                 type: string
@@ -111,73 +84,28 @@ router.get('/:id', getComment);
  *                 format: binary
  *     responses:
  *       201:
- *         description: Comment created
+ *         description: Comment with file created
  *       400:
  *         description: Validation error
  */
 router.post(
-  '/',
+  '/with-file',
   upload.single('file'),
   validateZod(createCommentSchema),
   checkCaptcha,
   sanitizeText,
   createComment
-);
+)
 
-/**
- * @swagger
- * /comments/{id}:
- *   patch:
- *     summary: Update a comment
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             properties:
- *               text:
- *                 type: string
- *               file:
- *                 type: string
- *                 format: binary
- *     responses:
- *       200:
- *         description: Updated comment
- *       400:
- *         description: Validation error
- */
+// ---------- UPDATE ----------
 router.patch(
   '/:id',
-  upload.single('file'),
   validateZod(updateCommentSchema),
   sanitizeText,
   updateComment
-);
+)
 
-/**
- * @swagger
- * /comments/{id}:
- *   delete:
- *     summary: Delete a comment
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Comment deleted
- *       404:
- *         description: Comment not found
- */
-router.delete('/:id', deleteComment);
+// ---------- DELETE ----------
+router.delete('/:id', deleteComment)
 
-export default router;
+export default router

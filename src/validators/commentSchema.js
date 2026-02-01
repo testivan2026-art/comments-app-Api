@@ -1,10 +1,10 @@
 import { z } from 'zod';
 
-// Регулярка для дозволених HTML тегів
+// Регулярка для дозволених HTML тегів (якщо треба — можна додати кастомну перевірку)
 const allowedHtmlRegex = /^(\s*<(\s*(a|code|i|strong)( [^>]+)?\s*>\s*)?[^<>]*<\/\2>\s*)*$/i;
 
 export const createCommentSchema = z.object({
-  user_name: z.string()
+  username: z.string()
     .min(1, 'Username is required')
     .regex(/^[a-zA-Z0-9]+$/, 'Username must contain only latin letters and digits'),
 
@@ -15,7 +15,7 @@ export const createCommentSchema = z.object({
   homepage: z.string()
     .url('Homepage must be a valid URL')
     .optional()
-    .or(z.literal('')), // для порожнього значення
+    .or(z.literal('')), // допускаємо порожнє значення
 
   captcha: z.string()
     .min(1, 'Captcha is required'),
@@ -23,14 +23,13 @@ export const createCommentSchema = z.object({
   text: z.string()
     .min(1, 'Text is required')
     .max(1000, 'Text must be between 1 and 1000 characters')
-    // Перевіряємо лише на базові дозволені теги, якщо треба складніше — можна кастомний sanitizer
-    //.regex(allowedHtmlRegex, 'Text contains invalid HTML tags')
+    //.regex(allowedHtmlRegex, 'Text contains invalid HTML tags') // можна розкоментувати для строгих тегів
 });
 
 // Для оновлення коментаря
 export const updateCommentSchema = z.object({
   text: z.string()
     .min(1, 'Text is required')
-    .max(1000, 'Text must be between 1 and 1000 characters')
+    .max(1000, 'Text must be between 1 і 1000 characters')
     .optional()
 });
