@@ -13,6 +13,8 @@ import { validateZod } from '../middlewares/validateZod.js'
 import { sanitizeText } from '../middlewares/sanitize.js'
 import { checkCaptcha } from '../middlewares/captcha.js'
 import { upload } from '../middlewares/upload.js'
+import { resizeImage } from '../middlewares/resizeImage.js'
+import { checkTextFileSize } from '../middlewares/checkTextFile.js'
 
 const router = express.Router()
 
@@ -24,14 +26,34 @@ router.get('/:id/files', getCommentFiles)
 /**
  * @swagger
  * /comments:
+ *   get:
+ *     summary: Get paginated comments
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: List of comments
+ */
+
+/**
+ * @swagger
+ * /comments:
  *   post:
- *     summary: Create a new comment (JSON)
+ *     summary: Create comment (JSON, without file)
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required: [username, email, text, captcha]
  *             properties:
  *               username:
  *                 type: string
@@ -46,8 +68,6 @@ router.get('/:id/files', getCommentFiles)
  *     responses:
  *       201:
  *         description: Comment created
- *       400:
- *         description: Validation error
  */
 router.post(
   '/',
@@ -61,13 +81,14 @@ router.post(
  * @swagger
  * /comments/with-file:
  *   post:
- *     summary: Create a new comment with a file (multipart)
+ *     summary: Create comment with file (image or txt)
  *     requestBody:
  *       required: true
  *       content:
  *         multipart/form-data:
  *           schema:
  *             type: object
+ *             required: [username, email, text, captcha, file]
  *             properties:
  *               username:
  *                 type: string
@@ -91,13 +112,37 @@ router.post(
 router.post(
   '/with-file',
   upload.single('file'),
+  resizeImage,
+  checkTextFileSize,
   validateZod(createCommentSchema),
   checkCaptcha,
   sanitizeText,
   createComment
 )
 
-// ---------- UPDATE ----------
+/**
+ * @swagger
+ * /comments/{id}:
+ *   patch:
+ *     summary: Update comment text
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             properties:
+ *               text:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Comment updated
+ */
 router.patch(
   '/:id',
   validateZod(updateCommentSchema),
@@ -105,7 +150,21 @@ router.patch(
   updateComment
 )
 
-// ---------- DELETE ----------
+/**
+ * @swagger
+ * /comments/{id}:
+ *   delete:
+ *     summary: Delete comment
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Comment deleted
+ */
 router.delete('/:id', deleteComment)
 
 export default router

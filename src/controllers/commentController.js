@@ -31,12 +31,12 @@ export const createComment = async (req, res) => {
     // якщо файл є (тільки для /with-file)
     if (req.file) {
       await File.create({
-        comment_id: comment.id,
-        filename: req.file.originalname,
-        mimetype: req.file.mimetype,
-        size: req.file.size,
-        path: req.file.path
-      }, { transaction })
+  comment_id: comment.id,
+  type: req.file.mimetype.startsWith('image/') ? 'image' : 'text',
+  path: req.file.path,
+  original_name: req.file.originalname,
+  size: req.file.size
+}, { transaction })
     }
 
     await transaction.commit()
