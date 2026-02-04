@@ -1,6 +1,9 @@
+```md
+🇺🇦 Ukrainian version: [README.ua.md](README.ua.md)
+
 # 💬 Comments App API
 
-REST API для SPA додатку, який дозволяє створювати ниткоподібні коментарі з можливістю прикріплення файлів, CAPTCHA валідації та HTML санітизації.
+REST API for an SPA application that allows creating threaded comments with file attachments, CAPTCHA validation, and HTML sanitization.
 
 ---
 
@@ -11,20 +14,22 @@ REST API для SPA додатку, який дозволяє створюват
 - **Sequelize ORM**
 - **MariaDB**
 - **Swagger (OpenAPI)**
-- **Multer** (для завантаження файлів)
-- **Zod / express-validator** (валідація)
+- **Multer** (file uploads)
+- **Zod / express-validator** (validation)
 - **Docker / Docker Compose**
+
+🇺🇦 Ukrainian version: [README.ua.md](README.ua.md)
 
 ---
 
 ## 📂 Project Structure
 
 config/
-├─ .env
-├─ db.js
+├─ .env  
+├─ db.js  
 docs/
-├─ shema.mwb
-node_modules/
+├─ shema.mwb  
+├─ Shema.png  
 src/
 ├─ controllers/
 │ ├─ commentController.js
@@ -56,56 +61,61 @@ src/
 └─ swagger.js
 uploads/
 ├─ example-file.jpg
+server.js
 package.json
 package-lock.json
-server.js
 README.md
 
 ---
 
 ## 🗄 Database Schema
 
-**Сутності:**
+**Entities:**
 - **User**
 - **Comment**
 - **File**
 
-**Відношення:**
-- User → має багато Comments
-- Comment → має багато Files
+**Relations:**
+- User → has many Comments
+- Comment → has many Files
 - Comment → self-referenced (parent_id)
 
-> ERD схема для MySQL Workbench: [docs/shema.mwb]  
-> Рекомендовано також зробити PNG експорт для швидкого перегляду.
+> ERD schema:
+> - `docs/shema.mwb` (MySQL Workbench)
+> - `docs/Shema.png` (preview)
 
 ---
 
 ## 🔐 Security
 
-- SQL Injection захист через Sequelize ORM
-- XSS захист через HTML санітизацію
-- Валідація на сервері та клієнті
-- Валідація типу та розміру файлів (JPG, PNG, GIF; TXT ≤100KB)
-- CAPTCHA валідація (серверна заглушка)
+- SQL Injection protection via Sequelize ORM
+- XSS protection via HTML sanitization
+- Server-side and client-side validation
+- File type & size validation:
+  - Images: JPG, PNG, GIF (auto-resized to 320x240)
+  - Text files: TXT ≤ 100KB
+- CAPTCHA validation (server-side stub, ready for real provider)
 
 ---
 
 ## 🧪 API Documentation (Swagger)
 
-Запустіть сервер та відкрийте:
+After starting the server, open:
 
-[http://localhost:3000/api-docs](http://localhost:3000/api-docs)
+http://localhost:3000/api-docs
 
-Маршрути:
+### Routes
 
-- `GET /comments` — отримати всі кореневі коментарі (пагінація, сортування)
-- `GET /comments/:id` — отримати конкретний коментар
-- `GET /comments/:id/files` — отримати файли коментаря
-- `POST /comments` — створити коментар (підтримка файлів, CAPTCHA)
-- `PATCH /comments/:id` — оновити текст коментаря
-- `DELETE /comments/:id` — видалити коментар
+- `GET /comments` — get root comments (pagination, sorting)
+- `GET /comments/:id` — get single comment
+- `GET /comments/:id/files` — get comment files
+- `POST /comments` — create comment without file
+- `POST /comments/with-file` — create comment with file (multipart/form-data, CAPTCHA)
+- `PATCH /comments/:id` — update comment text
+- `DELETE /comments/:id` — delete comment
 
-**Приклад відповіді (GET /comments):**
+### Example response (GET /comments)
+
 ```json
 {
   "total": 1,
@@ -127,25 +137,18 @@ README.md
   ]
 }
 
-Run Project
-🐳 With Docker (recommended)
-# 1. Build & start containers
+
+🏃 Run Project
+
+🐳 With Docker
 docker compose up --build -d
-
-
-# 2. Check logs
 docker compose logs -f
-
-
-# 3. Stop containers
 docker compose down
 
-Without Docker
-# 1. Install dependencies
+💻 Without Docker
 npm install
 
-
-# 2. Create .env file
+Create .env file:
 DB_HOST=localhost
 DB_USER=nodeuser
 DB_PASSWORD=123456789!
@@ -153,20 +156,13 @@ DB_NAME=comments_app
 DB_DIALECT=mariadb
 PORT=3000
 
-
-# 3. Start server
+Start server:
 npm start
-# або
+# or
 node server.js
 
-Example API Request
-
-Create Comment:
-
-POST /comments
-Content-Type: application/json
-
-
+📨 Example API Request
+Create comment (optional homepage)
 {
   "username": "Ivan123",
   "email": "ivan@test.com",
@@ -176,26 +172,26 @@ Content-Type: application/json
   "captcha": "A1b2"
 }
 
-Implemented Features:
+✅ Implemented Features
 
 Threaded comments (parent / replies)
 
-Pagination & sorting (LIFO default)
+Pagination & sorting (default: LIFO)
 
 File upload (images / text)
 
-Image resize to 320x240 px
+Automatic image resize to 320x240 px
 
-CAPTCHA validation (server stub)
+CAPTCHA validation (server-side stub)
 
-Swagger documentation
+Swagger API documentation
 
 XSS & SQL Injection protection
 
 Validation with Zod / express-validator
 
-Notes
+📝 Notes
 
-Для перегляду схеми використовуйте docs/shema.mwb у MySQL Workbench.
+Use docs/shema.mwb to view database schema in MySQL Workbench.
 
-Docker піднімає MariaDB + API сервіс і повністю сумісний з бекендом.
+Docker setup runs MariaDB and API services out of the box.
