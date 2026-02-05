@@ -1,5 +1,6 @@
 import { Sequelize } from "sequelize";
 import dotenv from "dotenv";
+
 dotenv.config();
 
 export const sequelize = new Sequelize(
@@ -9,7 +10,7 @@ export const sequelize = new Sequelize(
   {
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
-    dialect: "mariadb",
+    dialect: process.env.DB_DIALECT,
     logging: false,
   }
 );
@@ -19,6 +20,7 @@ export const testConnection = async () => {
     await sequelize.authenticate();
     console.log("✅ DB connection OK");
   } catch (error) {
-    console.error("❌ DB connection failed", error);
+    console.error("❌ DB connection failed");
+    console.error(error.message);
   }
 };
