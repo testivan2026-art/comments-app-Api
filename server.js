@@ -1,8 +1,12 @@
 import express from 'express';
-import app from './src/app.js';
-import { sequelize, testConnection } from './config/db.js';
+import dotenv from 'dotenv';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
+
+import app from './src/app.js';
+import { sequelize, testConnection } from './config/db.js';
+
+dotenv.config();
 
 // === Swagger конфігурація ===
 const swaggerOptions = {
@@ -15,7 +19,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: process.env.BASE_URL || 'http://localhost:3000',
+        url: process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`,
       },
     ],
   },
@@ -24,25 +28,36 @@ const swaggerOptions = {
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
+// Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+// === PORT для Render ===
 const PORT = process.env.PORT || 3000;
 
+// === Запуск сервера ===
 const start = async () => {
   try {
-    // чекаємо поки БД реально підніметься
+    console.log('⏳ Connecting to database...');
+
+    // 1️⃣ Перевірка підключення до БД
     await testConnection();
 
-    // синхронізація моделей
+    // 2️⃣ Синхронізація моделей (створить таблиці)
     await sequelize.sync();
 
+    console.log('✅ Database synced');
+
+    // 3️⃣ Запуск Express сервера
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`📚 Swagger: /api-docs`);
+      console.log(`📚 Swagger docs: /api-docs`);
     });
+
   } catch (err) {
-    console.error('Server start failed ❌', err);
-    process.exit(1); // Render побачить, що сервіс впав
+    console.error('❌ Server start failed:', err);
+
+    // Важливо для Render — щоб сервіс перезапустився
+    process.exit(1);
   }
 };
 
