@@ -15,35 +15,34 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: 'http://localhost:3000',
+        url: process.env.BASE_URL || 'http://localhost:3000',
       },
     ],
   },
-  apis: ['./src/routes/*.js'], // усі JSDoc коментарі в маршрутах
+  apis: ['./src/routes/*.js'],
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
-// Підключаємо Swagger UI
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 const start = async () => {
   try {
-    // тест підключення до БД
+    // чекаємо поки БД реально підніметься
     await testConnection();
 
     // синхронізація моделей
     await sequelize.sync();
 
-    // старт сервера
     app.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
-      console.log(` Swagger UI available at http://localhost:${PORT}/api-docs`);
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`📚 Swagger: /api-docs`);
     });
   } catch (err) {
     console.error('Server start failed ❌', err);
+    process.exit(1); // Render побачить, що сервіс впав
   }
 };
 
