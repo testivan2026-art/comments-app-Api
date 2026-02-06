@@ -1,33 +1,53 @@
-version: "3.9"
-
 services:
   mariadb:
     image: mariadb:11
     container_name: mariadb
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: "123456789!"
       MYSQL_DATABASE: comments_app
-      MYSQL_USER: app
-      MYSQL_PASSWORD: app
+      MYSQL_USER: nodeuser
+      MYSQL_PASSWORD: "123456789!"
     ports:
       - "3306:3306"
     volumes:
-      - mariadb_data:/var/lib/mysql
+      - db_data:/var/lib/mysql
 
-  api:
-    build: .
-    container_name: comments-api
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: comments-backend
     restart: always
     ports:
       - "3000:3000"
-    depends_on:
-      - mariadb
     environment:
       DB_HOST: mariadb
-      DB_USER: app
-      DB_PASSWORD: app
+      DB_USER: nodeuser
+      DB_PASSWORD: "123456789!"
       DB_NAME: comments_app
+      DB_DIALECT: mariadb
+      PORT: 3000
+    depends_on:
+      - mariadb
+    volumes:
+      - ./uploads:/app/uploads
+      - ./src:/app/src
+      - ./wait-for-db.sh:/app/wait-for-db.sh
+    command: ["./wait-for-db.sh"]
+
+  frontend:
+    build:
+      context: ../comments-app-frontend
+      dockerfile: Dockerfile
+    container_name: comments-frontend
+    restart: always
+    ports:
+      - "3001:5173"
+    environment:
+      VITE_API_URL: http://localhost:3000
+    depends_on:
+      - backend
 
 volumes:
-  mariadb_data:
+  db_data:
