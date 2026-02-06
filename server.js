@@ -6,6 +6,8 @@ import swaggerUi from 'swagger-ui-express';
 import app from './src/app.js';
 import { sequelize, testConnection } from './config/db.js';
 
+import './src/models/index.js';
+
 dotenv.config();
 
 // === Swagger конфігурація ===
