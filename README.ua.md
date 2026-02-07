@@ -1,11 +1,6 @@
----
-
-# 📄 README.ua.md (Українською)
-
-```md
 # 💬 Comments App API
 
-REST API для SPA-додатку, який дозволяє створювати ниткоподібні (вкладені) коментарі з можливістю прикріплення файлів, CAPTCHA-валідації та HTML-санітизації.
+REST API для SPA-додатку з ниткоподібними коментарями, завантаженням файлів, CAPTCHA та HTML-санітизацією.
 
 ---
 
@@ -14,170 +9,168 @@ REST API для SPA-додатку, який дозволяє створюват
 - **Node.js**
 - **Express.js**
 - **Sequelize ORM**
-- **MariaDB**
+- **MariaDB** (локально, Railway або Render)
 - **Swagger (OpenAPI)**
 - **Multer** (завантаження файлів)
-- **Zod / express-validator** (валідація)
+- **Zod / express-validator**
 - **Docker / Docker Compose**
-
-🇬🇧 English version: [README.md](README.md)
 
 ---
 
 ## 📂 Структура проєкту
 
-config/
-├─ .env  
-├─ db.js  
-docs/
-├─ shema.mwb  
-├─ Shema.png  
-src/
-├─ controllers/
-│ ├─ commentController.js
-│ ├─ fileController.js
-│ └─ userController.js
-├─ middlewares/
-│ ├─ captcha.js
-│ ├─ checkTextFile.js
-│ ├─ resizeImage.js
-│ ├─ sanitize.js
-│ ├─ upload.js
-│ ├─ validate.js
-│ └─ validateZod.js
-├─ models/
-│ ├─ Comment.js
-│ ├─ File.js
-│ ├─ User.js
-│ └─ index.js
-├─ routes/
-│ ├─ commentRoutes.js
-│ ├─ fileRoutes.js
-│ └─ userRoutes.js
-├─ validators/
-│ ├─ commentSchema.js
-│ ├─ commentValidator.js
-│ ├─ userSchema.js
-│ └─ userValidator.js
-├─ app.js
-└─ swagger.js
-uploads/
-├─ example-file.jpg
-server.js
-package.json
-package-lock.json
-README.ua.md
+(config/ | docs/ | src/ | uploads/ | server.js | package.json | README.ua.md)
 
 ---
 
-## 🗄 Схема бази даних
+## 🔧 Налаштування DB для локального запуску та деплою
 
-**Сутності:**
-- **User**
-- **Comment**
-- **File**
+.env приклад:
 
-**Звʼязки:**
-- User → має багато Comments
-- Comment → має багато Files
-- Comment → самопосилання (parent_id)
-
-> ERD схема:
-> - `docs/shema.mwb` (MySQL Workbench)
-> - `docs/Shema.png` (попередній перегляд)
-
----
-
-## 🔐 Безпека
-
-- Захист від SQL-інʼєкцій через Sequelize ORM
-- Захист від XSS через HTML-санітизацію
-- Валідація на сервері та клієнті
-- Перевірка типу та розміру файлів:
-  - Зображення: JPG, PNG, GIF (автоматичне зменшення до 320x240)
-  - Текстові файли: TXT ≤ 100KB
-- CAPTCHA (серверна заглушка, готова до інтеграції реального сервісу)
-
----
-
-## 🧪 API Документація (Swagger)
-
-Після запуску сервера відкрийте:
-
-http://localhost:3000/api-docs
-
-### Маршрути
-
-- `GET /comments` — отримати кореневі коментарі (пагінація, сортування)
-- `GET /comments/:id` — отримати конкретний коментар
-- `GET /comments/:id/files` — файли коментаря
-- `POST /comments` — створити коментар без файлу
-- `POST /comments/with-file` — створити коментар з файлом (multipart/form-data, CAPTCHA)
-- `PATCH /comments/:id` — оновити текст коментаря
-- `DELETE /comments/:id` — видалити коментар
-
----
-
-## 🏃 Запуск проєкту
-
-### 🐳 За допомогою Docker
-
-```bash
-docker compose up --build -d
-docker compose logs -f
-docker compose down
-
-
-💻 Без Docker
-npm install
-
-Створіть файл .env:
+```env
 DB_HOST=localhost
+DB_PORT=3306
 DB_USER=nodeuser
 DB_PASSWORD=123456789!
 DB_NAME=comments_app
 DB_DIALECT=mariadb
 PORT=3000
 
+Railway / Render:
 
-Запуск сервера:
-npm start
-# або
+Використовуй секрети (Environment Variables) для безпечного зберігання паролів
+
+Якщо виникають тайм-аути: збільш тайм-аут у config/db.js:
+
+
+export const sequelize = new Sequelize(
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
+  {
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT || 3306,
+    dialect: process.env.DB_DIALECT || "mysql",
+    logging: false,
+    dialectOptions: {
+      connectTimeout: 10000, // 10 секунд
+    },
+  }
+);
+
+
+🏃 Запуск проєкту
+🐳 Docker
+
+docker compose up --build -d
+docker compose logs -f
+docker compose down
+
+
+Локально
+npm install
 node server.js
 
 
-📨 Приклад API-запиту
-{
-  "username": "Ivan123",
-  "email": "ivan@test.com",
-  "homepage": "https://example.com",
-  "text": "Hello world!",
-  "parent_id": null,
-  "captcha": "A1b2"
-}
+🧪 API (Swagger)
 
+http://localhost:3000/api-docs
 
-✅Реалізовано
+GET /comments — кореневі коментарі
 
-Вкладені коментарі (parent / replies)
+POST /comments/with-file — створити коментар з файлом (CAPTCHA)
 
-Пагінація та сортування (LIFO за замовчуванням)
+PATCH /comments/:id — редагувати коментар
 
-Завантаження файлів (зображення / текст)
+DELETE /comments/:id — видалити коментар
 
-Автоматичне масштабування зображень до 320x240
+✅ Реалізовано
 
-CAPTCHA (серверна реалізація-заглушка)
+Вкладені коментарі (parent/replies)
+
+Пагінація та сортування
+
+Завантаження файлів (зображення/текст)
+
+Автоматичне масштабування зображень
+
+CAPTCHA (серверна заглушка)
 
 Swagger-документація
 
-Захист від XSS та SQL-інʼєкцій
+SQL & XSS захист
 
 Валідація через Zod / express-validator
 
-
 📝 Примітки
 
-Для перегляду схеми БД використовуйте docs/shema.mwb у MySQL Workbench.
+Схема БД: docs/shema.mwb
 
-Docker автоматично підіймає MariaDB та API-сервіс.
+Docker автоматично піднімає MariaDB та API сервіс.
+
+Для деплою на Render/Railway обов'язково використовуй environment variables замість .env
+
+
+
+## ☁️ Деплой на Render
+
+### 1️⃣ Створення Web Service
+
+- Зайдіть у [Render Dashboard](https://dashboard.render.com/)
+- Натисніть **New → Web Service**
+- Підключіть ваш репозиторій GitHub
+- Виберіть гілку: `main`
+- Runtime: **Node.js**
+- Build Command: `npm install && npm run build` (або просто `npm install`, якщо build не потрібен)
+- Start Command: `node server.js` (або `npm start`)
+
+### 2️⃣ Налаштування Environment Variables
+
+У **Environment → Add Environment Variable** додайте:
+
+| Ключ        | Значення (приклад)        |
+|------------|---------------------------|
+| DB_HOST    | `your-db-host`           |
+| DB_PORT    | `3306` (або ваш порт)    |
+| DB_USER    | `your-db-user`           |
+| DB_PASSWORD| `your-db-password`       |
+| DB_NAME    | `comments_app`           |
+| DB_DIALECT | `mariadb`                |
+| PORT       | `10000` (Render підставляє `$PORT`) |
+
+> **Порада:** У `config/db.js` використовуйте `process.env.PORT || 3000`, щоб Render міг підставляти свій порт.
+
+### 3️⃣ Збільшення тайм-ауту MariaDB (опційно)
+
+Якщо при деплої виникають timeout-и:
+
+```js
+export const sequelize = new Sequelize(
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
+  {
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT || 3306,
+    dialect: process.env.DB_DIALECT || "mysql",
+    logging: false,
+    dialectOptions: {
+      connectTimeout: 10000, // 10 секунд
+    },
+  }
+);
+4️⃣ Деплой та логування
+Натисніть Deploy на Render
+
+Логи доступні у Dashboard → Service → Logs
+
+Перевірте, щоб зʼявилось: ✅ DB connection OK
+
+Swagger документація: https://your-service.onrender.com/api-docs
+
+5️⃣ Ініціалізація БД / Міграції
+Переконайтесь, що ваша БД на Render / Railway створена
+
+Використайте SQL dump або sequelize.sync() для створення таблиць та початкових даних
+
+✅ Backend тепер запущено та готовий обробляти запити!
