@@ -12,6 +12,17 @@ export const sequelize = new Sequelize(
     port: process.env.DB_PORT || 3306,
     dialect: process.env.DB_DIALECT || "mysql",
     logging: false,
+    dialectOptions: {
+      connectTimeout: 30000, // 30 секунд тайм-аут на з'єднання
+      // якщо DB вимагатиме SSL (для PostgreSQL/DBaaS)
+      ssl: process.env.DB_SSL === "true" ? { rejectUnauthorized: true } : false,
+    },
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 30000, // 30 секунд для отримання конекшну з пулу
+      idle: 10000,    // 10 секунд тайм-аут бездіяльності
+    },
   }
 );
 
