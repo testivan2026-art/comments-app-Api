@@ -10,11 +10,13 @@ const app = express();
 
 // --- CORS ---
 app.use(cors({
-  origin: 'http://localhost:3001', 
-  methods: ['GET','POST','PUT','DELETE'],
-  credentials: true // якщо використовуєш кукі/сесії
-}));
-
+  origin: [
+    'http://localhost:3001',
+    'https://comments-app-frontend-sooty.vercel.app'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}))
 // --- Body parser ---
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
