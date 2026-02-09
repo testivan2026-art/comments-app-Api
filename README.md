@@ -1,202 +1,114 @@
-🇺🇦 Ukrainian version: [README.ua.md](README.ua.md)
+# 💬 Comments App Frontend
 
-# 💬 Comments App API
-
-REST API for an SPA application that supports threaded comments, file uploads, CAPTCHA validation, and HTML sanitization.
+SPA application built with **React 19 + Vite** for interacting with the Comments App API.  
+Supports threaded comments, file uploads, pagination, and CAPTCHA.
 
 ---
 
 ## 🚀 Tech Stack
 
-- **Node.js**
-- **Express.js**
-- **Sequelize ORM**
-- **MariaDB** (local, Railway or Render)
-- **Swagger (OpenAPI)**
-- **Multer** (file uploads)
-- **Zod / express-validator**
-- **Docker / Docker Compose**
+- **React 19**
+- **Vite** (fast dev server + HMR)
+- **React Router** (optional)
+- **Axios / fetch** for API requests
+- **Zod** for form validation (optional)
+- **Tailwind CSS** or any UI framework
+- **Docker / Docker Compose** (optional)
 
 ---
 
 ## 📂 Project Structure
 
-(config/ | docs/ | src/ | uploads/ | server.js | package.json | README.md)
+public/
+src/
+├─ api/
+│ ├─ commentsApi.js
+│ └─ handleApi.js
+├─ components/
+│ ├─ CommentForm.jsx
+│ ├─ CommentList.jsx
+│ └─ CommentItem.jsx
+├─ pages/
+│ └─ Home.jsx
+├─ styles/
+│ └─ index.css
+├─ App.jsx
+├─ main.jsx
+└─ ...
+package.json
+vite.config.js
+.env
+.env.production
+README.md
+
 
 ---
 
-## 🔧 DB Setup
+## ⚙ Environment Variables
 
-### Local `.env` example:
+Create a `.env` file in the project root:
 
-```env
-DB_HOST=localhost
-DB_PORT=3306
-DB_USER=nodeuser
-DB_PASSWORD=123456789!
-DB_NAME=comments_app
-DB_DIALECT=mariadb
-PORT=3000
+```bash
+VITE_API_URL=http://localhost:3000
+Points to your backend API URL.
 
+🏃‍♂️ Run Project
+🐳 With Docker (optional)
+# 1. Build frontend Docker image
+docker build -t comments-frontend .
 
-Railway / Render
-
-Use Environment Variables for credentials (instead of .env)
-
-If you face connection timeouts, increase the timeout in config/db.js:
-
-export const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
-  {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT || 3306,
-    dialect: process.env.DB_DIALECT || "mysql",
-    logging: false,
-    dialectOptions: {
-      connectTimeout: 10000, // 10 seconds
-    },
-  }
-);
-
-
-🏃 Running the Project
-🐳 With Docker
-docker compose up --build -d
-docker compose logs -f
-docker compose down
-
+# 2. Run container (port 3001)
+docker run -it -p 3001:3000 comments-frontend
 💻 Without Docker
+# 1. Install dependencies
 npm install
-node server.js
 
+# 2. Start dev server
+npm run dev
 
-🧪 API Documentation (Swagger)
+# 3. Open in browser
+http://localhost:3001
+✨ Features
+Create comments with validation
 
-Open after starting the server:
+Threaded replies (nested comments)
 
-http://localhost:3000/api-docs
+Pagination and sorting
 
-Routes
+File uploads (sent to backend)
 
-GET /comments — get root comments
+CAPTCHA support (server-side mock)
 
-POST /comments/with-file — create comment with file (CAPTCHA)
+XSS protection via backend sanitization
 
-PATCH /comments/:id — update comment
+Fast HMR via Vite
 
-DELETE /comments/:id — delete comment
+🧩 Example Usage
+CommentForm:
 
-Example Response (GET /comments)
-{
-  "total": 1,
-  "page": 1,
-  "totalPages": 1,
-  "comments": [
-    {
-      "id": 1,
-      "text": "Hello world!",
-      "user": {
-        "id": 1,
-        "username": "Ivan123",
-        "email": "ivan@test.com"
-      },
-      "files": [],
-      "replies": [],
-      "created_at": "2026-02-01T12:00:00Z"
-    }
-  ]
-}
+<CommentForm
+  parentId={null}
+  onSuccess={() => console.log('Comment created!')}
+/>
+Fetching Comments:
 
-✅ Implemented Features
+import { getComments } from '../api/commentsApi'
 
-Threaded comments (parent / replies)
-
-Pagination & sorting (default: LIFO)
-
-File uploads (images / text)
-
-Automatic image resize to 320x240 px
-
-CAPTCHA (server-side stub)
-
-Swagger API documentation
-
-SQL & XSS protection
-
-Validation with Zod / express-validator
-
+const { comments, totalPages } = await getComments(1)
 📝 Notes
+Backend API must run on: http://localhost:3000
 
-Database schema: docs/shema.mwb
+API URL can be changed via .env
 
-Docker setup automatically runs MariaDB and API service
+Swagger UI for testing: http://localhost:3000/api-docs
 
-For Render / Railway deployment, use environment variables for DB credentials instead of .env
+Reply comments are rendered automatically in CommentList
 
-Increase MariaDB connection timeout if needed (see above)
+🛠 Recommended Workflow
+Create a new branch for each feature or fix
 
+Commit and push changes to GitHub
 
-## ☁️ Render Deployment
+Merge into main or develop after review
 
-### 1️⃣ Create a new Web Service
-
-- Go to [Render Dashboard](https://dashboard.render.com/)
-- Click **New → Web Service**
-- Connect your GitHub repository
-- Branch: `main`
-- Runtime: **Node.js**
-- Build Command: `npm install && npm run build` (or just `npm install` if no build)
-- Start Command: `node server.js` (or `npm start`)
-
-### 2️⃣ Set Environment Variables
-
-Use **Environment → Add Environment Variable**:
-
-| Key         | Value (example)           |
-|------------|---------------------------|
-| DB_HOST    | `your-db-host`           |
-| DB_PORT    | `3306` (or your DB port)|
-| DB_USER    | `your-db-user`           |
-| DB_PASSWORD| `your-db-password`       |
-| DB_NAME    | `comments_app`           |
-| DB_DIALECT | `mariadb`                |
-| PORT       | `10000` (Render assigns port via `$PORT`) |
-
-> **Tip:** In `config/db.js`, use `process.env.PORT || 3000` to allow Render to inject the port.
-
-### 3️⃣ Increase MariaDB Connection Timeout (Optional)
-
-In case of deployment connection timeouts:
-
-```js
-export const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
-  {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT || 3306,
-    dialect: process.env.DB_DIALECT || "mysql",
-    logging: false,
-    dialectOptions: {
-      connectTimeout: 10000, // 10 seconds
-    },
-  }
-);
-4️⃣ Deploy & Logs
-Click Deploy on Render
-
-View logs in Dashboard → Service → Logs
-
-Make sure ✅ DB connection OK appears
-
-Swagger docs: https://your-service.onrender.com/api-docs
-
-5️⃣ Database Migration / Seeding
-Make sure your DB on Render / Railway is initialized
-
-Use your SQL dump (or Sequelize sync) to create tables and seed data
-
-✅ Now your backend is live and ready to serve requests!
+Use Docker to test frontend + backend together
