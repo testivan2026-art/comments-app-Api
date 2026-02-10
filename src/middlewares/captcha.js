@@ -5,7 +5,13 @@ export const checkCaptcha = (req, res, next) => {
     return res.status(400).json({ message: 'CAPTCHA is required' });
   }
 
-  if (captcha !== process.env.CAPTCHA_SECRET) {
+  // якщо секрет не заданий — captcha ВИМКНЕНО
+  if (!process.env.CAPTCHA_SECRET) {
+    console.warn('⚠ CAPTCHA_SECRET not set — captcha skipped');
+    return next();
+  }
+
+  if (captcha !== String(process.env.CAPTCHA_SECRET)) {
     return res.status(400).json({ message: 'Invalid CAPTCHA' });
   }
 

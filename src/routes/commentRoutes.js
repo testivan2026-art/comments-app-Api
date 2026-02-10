@@ -1,4 +1,4 @@
-import express from 'express'
+import express from 'express';
 import {
   createComment,
   getComments,
@@ -6,22 +6,25 @@ import {
   updateComment,
   deleteComment,
   getCommentFiles
-} from '../controllers/commentController.js'
+} from '../controllers/commentController.js';
 
-import { createCommentSchema, updateCommentSchema } from '../validators/commentSchema.js'
-import { validateZod } from '../middlewares/validateZod.js'
-import { sanitizeText } from '../middlewares/sanitize.js'
-import { checkCaptcha } from '../middlewares/captcha.js'
-import { upload } from '../middlewares/upload.js'
-import { resizeImage } from '../middlewares/resizeImage.js'
-import { checkTextFileSize } from '../middlewares/checkTextFile.js'
+import {
+  createCommentSchema,
+  updateCommentSchema
+} from '../validators/commentSchema.js';
 
-const router = express.Router()
+import { validateZod } from '../middlewares/validateZod.js';
+import { sanitizeText } from '../middlewares/sanitize.js';
+import { checkCaptcha } from '../middlewares/captcha.js';
+import { upload } from '../middlewares/upload.js';
+import { resizeImage } from '../middlewares/resizeImage.js';
+import { checkTextFileSize } from '../middlewares/checkTextFile.js';
 
-// ---------- READ ----------
-router.get('/', getComments)
-router.get('/:id', getComment)
-router.get('/:id/files', getCommentFiles)
+const router = express.Router();
+
+/* ===========================
+   READ
+=========================== */
 
 /**
  * @swagger
@@ -41,6 +44,45 @@ router.get('/:id/files', getCommentFiles)
  *       200:
  *         description: List of comments
  */
+router.get('/', getComments);
+
+/**
+ * @swagger
+ * /comments/{id}:
+ *   get:
+ *     summary: Get comment by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Comment
+ */
+router.get('/:id', getComment);
+
+/**
+ * @swagger
+ * /comments/{id}/files:
+ *   get:
+ *     summary: Get files of comment
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Files list
+ */
+router.get('/:id/files', getCommentFiles);
+
+/* ===========================
+   CREATE (JSON)
+=========================== */
 
 /**
  * @swagger
@@ -63,11 +105,15 @@ router.get('/:id/files', getCommentFiles)
  *                 type: string
  *               parent_id:
  *                 type: integer
+ *               homepage:
+ *                 type: string
  *               captcha:
  *                 type: string
  *     responses:
  *       201:
  *         description: Comment created
+ *       400:
+ *         description: Validation error
  */
 router.post(
   '/',
@@ -75,7 +121,11 @@ router.post(
   checkCaptcha,
   sanitizeText,
   createComment
-)
+);
+
+/* ===========================
+   CREATE (WITH FILE)
+=========================== */
 
 /**
  * @swagger
@@ -98,6 +148,8 @@ router.post(
  *                 type: string
  *               parent_id:
  *                 type: integer
+ *               homepage:
+ *                 type: string
  *               captcha:
  *                 type: string
  *               file:
@@ -111,14 +163,30 @@ router.post(
  */
 router.post(
   '/with-file',
+
+  // 1️⃣ multipart → req.body + req.file
   upload.single('file'),
+
+  // 2️⃣ логічна валідація body
+  validateZod(createCommentSchema),
+
+  // 3️⃣ captcha
+  checkCaptcha,
+
+  // 4️⃣ sanitize text
+  sanitizeText,
+
+  // 5️⃣ робота з файлом
   resizeImage,
   checkTextFileSize,
-  validateZod(createCommentSchema),
-  checkCaptcha,
-  sanitizeText,
+
+  // 6️⃣ create
   createComment
-)
+);
+
+/* ===========================
+   UPDATE
+=========================== */
 
 /**
  * @swagger
@@ -148,7 +216,11 @@ router.patch(
   validateZod(updateCommentSchema),
   sanitizeText,
   updateComment
-)
+);
+
+/* ===========================
+   DELETE
+=========================== */
 
 /**
  * @swagger
@@ -165,6 +237,6 @@ router.patch(
  *       200:
  *         description: Comment deleted
  */
-router.delete('/:id', deleteComment)
+router.delete('/:id', deleteComment);
 
-export default router
+export default router;
