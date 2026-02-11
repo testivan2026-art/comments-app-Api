@@ -1,0 +1,10 @@
+DB_HOST=dpg-d61v531r0fns73d5dbi0-a
+DB_PORT=5432
+DB_NAME=comments_app
+DB_USER=comments_user
+DB_PASSWORD=oGx9V0QNJMnjL8ZEI5cxFT8uBia5ofUi
+DB_DIALECT=postgres
+
+PORT=3000
+NODE_ENV=production
+CAPTCHA_SECRET=1234
