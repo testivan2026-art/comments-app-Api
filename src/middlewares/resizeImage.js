@@ -8,6 +8,8 @@ export const resizeImage = async (req, res, next) => {
   if (!req.file.mimetype.startsWith('image/')) {
     // TXT — не чіпаємо
     return next();
+     // resize logic...
+  next();
   }
 
   const filePath = req.file.path;

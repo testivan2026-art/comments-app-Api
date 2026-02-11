@@ -81,7 +81,7 @@ router.get('/:id', getComment);
 router.get('/:id/files', getCommentFiles);
 
 /* ===========================
-   CREATE (JSON)
+   CREATE (JSON ONLY)
 =========================== */
 
 /**
@@ -131,14 +131,14 @@ router.post(
  * @swagger
  * /comments/with-file:
  *   post:
- *     summary: Create comment with file (image or txt)
+ *     summary: Create comment with optional file (image or txt)
  *     requestBody:
  *       required: true
  *       content:
  *         multipart/form-data:
  *           schema:
  *             type: object
- *             required: [username, email, text, captcha, file]
+ *             required: [username, email, text, captcha]
  *             properties:
  *               username:
  *                 type: string
@@ -164,23 +164,24 @@ router.post(
 router.post(
   '/with-file',
 
-  // 1️⃣ multipart → req.body + req.file
+  // 1️⃣ Parse multipart → req.body + req.file
   upload.single('file'),
 
-  // 2️⃣ логічна валідація body
+ // 2️⃣ Validate parsed body
   validateZod(createCommentSchema),
 
-  // 3️⃣ captcha
+  // 3️⃣ CAPTCHA
   checkCaptcha,
 
-  // 4️⃣ sanitize text
+  // 4️ Sanitize text
   sanitizeText,
 
-  // 5️⃣ робота з файлом
+
+  // 5️⃣ File handling
   resizeImage,
   checkTextFileSize,
 
-  // 6️⃣ create
+  // 6️⃣ Create comment
   createComment
 );
 
