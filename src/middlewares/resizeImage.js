@@ -1,15 +1,12 @@
 import sharp from 'sharp';
-import path from 'path';
 import fs from 'fs';
 
 export const resizeImage = async (req, res, next) => {
   if (!req.file) return next();
 
+  // Якщо не image — просто пропускаємо
   if (!req.file.mimetype.startsWith('image/')) {
-    // TXT — не чіпаємо
     return next();
-     // resize logic...
-  next();
   }
 
   const filePath = req.file.path;
@@ -28,8 +25,9 @@ export const resizeImage = async (req, res, next) => {
     fs.unlinkSync(filePath);
     fs.renameSync(tempPath, filePath);
 
-    next();
+    return next();
   } catch (err) {
-    next(err);
+    console.error('Image resize error:', err);
+    return res.status(400).json({ message: 'Image processing failed' });
   }
 };
