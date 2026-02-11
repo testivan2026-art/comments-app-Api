@@ -1,4 +1,3 @@
-import express from 'express';
 import dotenv from 'dotenv';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
@@ -10,7 +9,7 @@ import './src/models/index.js';
 
 dotenv.config();
 
-// === Swagger конфігурація ===
+// === Swagger config ===
 const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
@@ -30,35 +29,22 @@ const swaggerOptions = {
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
-// Swagger UI
+// Swagger UI route
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// === PORT для Render ===
+// === Render PORT ===
 const PORT = process.env.PORT || 3000;
 
-// === Запуск сервера ===
+// === Start server ===
 const start = async () => {
   try {
-    console.log('⏳ Connecting to database...');
-
-    // 1️⃣ Перевірка підключення до БД
     await testConnection();
 
-    // 2️⃣ Синхронізація моделей (створить таблиці)
-    await sequelize.sync();
+    // Avoid heavy sync on prod
+    await sequelize.sync({ alter: false });
 
-    console.log('✅ Database synced');
-
-    // 3️⃣ Запуск Express сервера
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`📚 Swagger docs: /api-docs`);
-    });
-
-  } catch (err) {
-    console.error('❌ Server start failed:', err);
-
-    // Важливо для Render — щоб сервіс перезапустився
+    app.listen(PORT);
+  } catch {
     process.exit(1);
   }
 };
