@@ -1,13 +1,12 @@
 import dotenv from 'dotenv';
+dotenv.config();
+
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 
 import app from './src/app.js';
 import { sequelize, testConnection } from './config/db.js';
-
 import './src/models/index.js';
-
-dotenv.config();
 
 // === Swagger config ===
 const swaggerOptions = {
@@ -28,25 +27,26 @@ const swaggerOptions = {
 };
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
-
-// Swagger UI route
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// === Render PORT ===
+// === PORT (Render injects this) ===
 const PORT = process.env.PORT || 3000;
 
 // === Start server ===
 const start = async () => {
   try {
     await testConnection();
+    console.log('✅ DB connected');
 
-    // Avoid heavy sync on prod
     await sequelize.sync({ alter: false });
-
-    app.listen(PORT);
-  } catch {
-    process.exit(1);
+  } catch (err) {
+    console.error('❌ DB connection failed:', err.message);
+    
   }
+
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+  });
 };
 
 start();
