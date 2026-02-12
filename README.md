@@ -41,33 +41,30 @@ vite.config.js
 .env.production
 README.md
 
-
 ---
 
 ## ⚙ Environment Variables
 
 Create a `.env` file in the project root:
 
-```bash
+```env
+# Local development
 VITE_API_URL=http://localhost:3000
-Points to your backend API URL.
 
+# Production (Render / Railway)
+VITE_API_URL=https://your-backend-service.onrender.com
 🏃‍♂️ Run Project
-🐳 With Docker (optional)
-# 1. Build frontend Docker image
-docker build -t comments-frontend .
-
-# 2. Run container (port 3001)
-docker run -it -p 3001:3000 comments-frontend
-💻 Without Docker
-# 1. Install dependencies
+💻 Local development
+bash
+Копіювати код
 npm install
-
-# 2. Start dev server
 npm run dev
-
-# 3. Open in browser
-http://localhost:3001
+# Open http://localhost:3000
+🐳 With Docker
+bash
+Копіювати код
+docker build -t comments-frontend .
+docker run -it -p 3001:3000 comments-frontend
 ✨ Features
 Create comments with validation
 
@@ -86,15 +83,19 @@ Fast HMR via Vite
 🧩 Example Usage
 CommentForm:
 
+jsx
+Копіювати код
 <CommentForm
   parentId={null}
   onSuccess={() => console.log('Comment created!')}
 />
 Fetching Comments:
 
-import { getComments } from '../api/commentsApi'
+js
+Копіювати код
+import { getComments } from '../api/commentsApi';
 
-const { comments, totalPages } = await getComments(1)
+const { comments, totalPages } = await getComments(1);
 📝 Notes
 Backend API must run on: http://localhost:3000
 

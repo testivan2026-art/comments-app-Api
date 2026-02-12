@@ -1,3 +1,4 @@
+```md
 # 💬 Comments App API
 
 REST API для SPA-додатку з ниткоподібними коментарями, завантаженням файлів, CAPTCHA та HTML-санітизацією.
@@ -19,61 +20,42 @@ REST API для SPA-додатку з ниткоподібними комент�
 
 ## 📂 Структура проєкту
 
-(config/ | docs/ | src/ | uploads/ | server.js | package.json | README.ua.md)
+config/ | docs/ | src/ | uploads/ | server.js | package.json | README.ua.md
 
 ---
 
-## 🔧 Налаштування DB для локального запуску та деплою
+## 🔧 Налаштування DB
 
-.env приклад:
+- Локально використовуйте DB_HOST/DB_USER/DB_PASSWORD
+- Продакшен (Render / Railway) використовуйте тільки `MYSQL_URL`
 
-```env
-DB_HOST=localhost
-DB_PORT=3306
-DB_USER=nodeuser
-DB_PASSWORD=123456789!
-DB_NAME=comments_app
-DB_DIALECT=mariadb
-PORT=3000
+```js
+import { Sequelize } from "sequelize";
 
-Railway / Render:
+export const sequelize = new Sequelize(process.env.MYSQL_URL, {
+  dialect: "mariadb",
+  logging: false,
+  dialectOptions: { connectTimeout: 30000 },
+  pool: { max: 5, min: 0, acquire: 60000, idle: 10000 },
+});
 
-Використовуй секрети (Environment Variables) для безпечного зберігання паролів
-
-Якщо виникають тайм-аути: збільш тайм-аут у config/db.js:
-
-
-export const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
-  {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT || 3306,
-    dialect: process.env.DB_DIALECT || "mysql",
-    logging: false,
-    dialectOptions: {
-      connectTimeout: 10000, // 10 секунд
-    },
-  }
-);
-
-
-🏃 Запуск проєкту
+export const testConnection = async () => {
+  await sequelize.authenticate();
+};
+🏃‍♂️ Запуск проєкту
+💻 Локально
+bash
+Копіювати код
+npm install
+node server.js
+# http://localhost:3000
 🐳 Docker
-
+bash
+Копіювати код
 docker compose up --build -d
 docker compose logs -f
 docker compose down
-
-
-Локально
-npm install
-node server.js
-
-
 🧪 API (Swagger)
-
 http://localhost:3000/api-docs
 
 GET /comments — кореневі коментарі
@@ -84,7 +66,7 @@ PATCH /comments/:id — редагувати коментар
 
 DELETE /comments/:id — видалити коментар
 
-✅ Реалізовано
+✅ Реалізовано:
 
 Вкладені коментарі (parent/replies)
 
@@ -103,74 +85,45 @@ SQL & XSS захист
 Валідація через Zod / express-validator
 
 📝 Примітки
-
 Схема БД: docs/shema.mwb
 
-Docker автоматично піднімає MariaDB та API сервіс.
+Docker автоматично піднімає MariaDB та API сервіс
 
 Для деплою на Render/Railway обов'язково використовуй environment variables замість .env
 
+☁️ Деплой на Render / Railway
+1️⃣ Створення Web Service
+Підключіть репозиторій GitHub
 
+Виберіть гілку: main
 
-## ☁️ Деплой на Render
+Runtime: Node.js
 
-### 1️⃣ Створення Web Service
+Build Command: npm install (або npm install && npm run build)
 
-- Зайдіть у [Render Dashboard](https://dashboard.render.com/)
-- Натисніть **New → Web Service**
-- Підключіть ваш репозиторій GitHub
-- Виберіть гілку: `main`
-- Runtime: **Node.js**
-- Build Command: `npm install && npm run build` (або просто `npm install`, якщо build не потрібен)
-- Start Command: `node server.js` (або `npm start`)
+Start Command: node server.js
 
-### 2️⃣ Налаштування Environment Variables
+2️⃣ Environment Variables
+Ключ	Значення (приклад)
+MYSQL_URL	mysql://root:password@hopper.proxy.rlwy.net:19858/railway
+PORT	3000 (Render підставляє $PORT)
+CAPTCHA_SECRET	1234
 
-У **Environment → Add Environment Variable** додайте:
+DB_HOST, DB_USER, DB_PASSWORD, DB_NAME більше не потрібні
 
-| Ключ        | Значення (приклад)        |
-|------------|---------------------------|
-| DB_HOST    | `your-db-host`           |
-| DB_PORT    | `3306` (або ваш порт)    |
-| DB_USER    | `your-db-user`           |
-| DB_PASSWORD| `your-db-password`       |
-| DB_NAME    | `comments_app`           |
-| DB_DIALECT | `mariadb`                |
-| PORT       | `10000` (Render підставляє `$PORT`) |
+3️⃣ Deploy та логування
+Manual Deploy → Clear build cache & deploy
 
-> **Порада:** У `config/db.js` використовуйте `process.env.PORT || 3000`, щоб Render міг підставляти свій порт.
+Логи повинні показати:
 
-### 3️⃣ Збільшення тайм-ауту MariaDB (опційно)
+arduino
+Копіювати код
+✅ DB connected
+🚀 Server running on port 3000
+4️⃣ Ініціалізація БД / Міграції
+Переконайтесь, що БД створена на Railway/Render
 
-Якщо при деплої виникають timeout-и:
+Використайте sequelize.sync() або SQL dump
 
-```js
-export const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
-  {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT || 3306,
-    dialect: process.env.DB_DIALECT || "mysql",
-    logging: false,
-    dialectOptions: {
-      connectTimeout: 10000, // 10 секунд
-    },
-  }
-);
-4️⃣ Деплой та логування
-Натисніть Deploy на Render
-
-Логи доступні у Dashboard → Service → Logs
-
-Перевірте, щоб зʼявилось: ✅ DB connection OK
-
-Swagger документація: https://your-service.onrender.com/api-docs
-
-5️⃣ Ініціалізація БД / Міграції
-Переконайтесь, що ваша БД на Render / Railway створена
-
-Використайте SQL dump або sequelize.sync() для створення таблиць та початкових даних
-
-✅ Backend тепер запущено та готовий обробляти запити!
+yaml
+Копіювати код
