@@ -39,14 +39,15 @@ const start = async () => {
     console.log('✅ DB connected');
 
     await sequelize.sync({ alter: false });
+
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
+
   } catch (err) {
     console.error('❌ DB connection failed:', err.message);
-    
+    process.exit(1); 
   }
-
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-  });
 };
 
 start();
