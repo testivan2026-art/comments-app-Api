@@ -20,7 +20,58 @@ REST API для SPA-додатку з ниткоподібними комент�
 
 ## 📂 Структура проєкту
 
-config/ | docs/ | src/ | uploads/ | server.js | package.json | README.ua.md
+comments-app-api/
+│
+├── config/
+│   └── db.js
+│
+├── docs/
+│   ├── shema.mwb
+│   └── Shema.png
+│
+├── src/
+│   ├── controllers/
+│   │   ├── commentController.js
+│   │   ├── fileController.js
+│   │   └── userController.js
+│   │
+│   ├── middlewares/
+│   │   ├── captcha.js
+│   │   ├── checkTextFile.js
+│   │   ├── resizeImage.js
+│   │   ├── sanitize.js
+│   │   ├── upload.js
+│   │   └── validateZod.js
+│   │
+│   ├── models/
+│   │   ├── Comment.js
+│   │   ├── File.js
+│   │   ├── User.js
+│   │   └── index.js
+│   │
+│   ├── routes/
+│   │   ├── captchaRoutes.js
+│   │   ├── commentRoutes.js
+│   │   ├── fileRoutes.js
+│   │   └── userRoutes.js
+│   │
+│   ├── validators/
+│   │   ├── commentSchema.js
+│   │   └── userSchema.js
+│   │
+│   ├── app.js
+│   └── swagger.js
+│
+├── uploads/
+├── docker-compose.yml
+├── Dockerfile
+├── .env
+├── .env.example
+├── .gitignore
+├── package.json
+├── server.js
+├── README.md
+└── README.ua.md
 
 ---
 
@@ -76,7 +127,28 @@ DELETE /comments/:id — видалити коментар
 
 Автоматичне масштабування зображень
 
-CAPTCHA (серверна заглушка)
+## 🔐 CAPTCHA (session-based)
+
+Використовується `express-session` + `svg-captcha`.
+
+### 🔄 Flow роботи:
+
+1️⃣ `GET /captcha`  
+→ Генерує SVG з випадковим кодом  
+→ Зберігає код у `req.session.captcha`  
+→ Встановлює cookie `connect.sid`
+
+2️⃣ `POST /comments`  
+→ Користувач передає `captcha` у body  
+→ Сервер порівнює з `req.session.captcha`  
+→ Якщо співпадає — коментар створюється  
+→ CAPTCHA одноразова (після перевірки видаляється)
+
+⚠ У продакшені frontend повинен надсилати запити з:
+
+```js
+credentials: 'include'
+
 
 Swagger-документація
 
@@ -107,7 +179,7 @@ Start Command: node server.js
 Ключ	Значення (приклад)
 MYSQL_URL	mysql://root:password@hopper.proxy.rlwy.net:19858/railway
 PORT	3000 (Render підставляє $PORT)
-CAPTCHA_SECRET	1234
+
 
 DB_HOST, DB_USER, DB_PASSWORD, DB_NAME більше не потрібні
 
