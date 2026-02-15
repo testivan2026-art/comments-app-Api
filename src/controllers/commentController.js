@@ -13,6 +13,15 @@ export const createComment = async (req, res) => {
       })
     }
 
+    //  Отримуємо реальний IP
+    let ip = req.ip;
+
+if (ip?.startsWith('::ffff:')) {
+  ip = ip.replace('::ffff:', '');
+}
+
+console.log('Saved IP:', ip);
+
     const [user] = await User.findOrCreate({
       where: { email },
       defaults: { username },
@@ -23,20 +32,20 @@ export const createComment = async (req, res) => {
       {
         text,
         parent_id: parent_id || null,
-        user_id: user.id
+        user_id: user.id,
+        ip 
       },
       { transaction }
     )
 
-    // якщо файл є (тільки для /with-file)
     if (req.file) {
       await File.create({
-  comment_id: comment.id,
-  type: req.file.mimetype.startsWith('image/') ? 'image' : 'text',
-  path: req.file.path,
-  original_name: req.file.originalname,
-  size: req.file.size
-}, { transaction })
+        comment_id: comment.id,
+        type: req.file.mimetype.startsWith('image/') ? 'image' : 'text',
+        path: req.file.path,
+        original_name: req.file.originalname,
+        size: req.file.size
+      }, { transaction })
     }
 
     await transaction.commit()
@@ -122,3 +131,4 @@ export const getCommentFiles = async (req, res) => {
   })
   res.json(files)
 }
+

@@ -11,6 +11,7 @@ export const createCommentSchema = z.object({
   homepage: z.string().optional().or(z.literal('')),
 
   captcha: z.string().min(1),
+  captchaId: z.string().uuid(),
 });
 
 export const updateCommentSchema = z.object({
