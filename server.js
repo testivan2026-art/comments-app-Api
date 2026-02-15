@@ -6,6 +6,7 @@ import swaggerUi from 'swagger-ui-express';
 
 import app from './src/app.js';
 import { sequelize, testConnection } from './config/db.js';
+import { Captcha } from './src/models/index.js';
 import './src/models/index.js';
 
 // === Swagger config ===
@@ -39,6 +40,18 @@ const start = async () => {
     console.log('✅ DB connected');
 
     await sequelize.sync({ alter: false });
+
+    setInterval(async () => {
+  const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+
+  await Captcha.destroy({
+    where: {
+      created_at: {
+        [sequelize.Sequelize.Op.lt]: fiveMinutesAgo
+      }
+    }
+  });
+}, 5 * 60 * 1000);
 
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 Server running on port ${PORT}`);

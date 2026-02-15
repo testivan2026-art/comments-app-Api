@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import session from 'express-session';
+
 import path from 'path';
 
 import commentRoutes from './routes/commentRoutes.js';
@@ -24,7 +24,7 @@ app.use(cors({
     'http://localhost:3001',
     'https://comments-app-frontend-sooty.vercel.app'
   ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PATCH', 'DELETE'],
   credentials: true
 }));
 
@@ -37,18 +37,7 @@ app.use(express.urlencoded({ extended: true }));
 /* ===============================
    SESSION (CAPTCHA)
 ================================ */
-app.use(session({
-  name: 'connect.sid',
-  secret: process.env.SESSION_SECRET || 'supersecretkey',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    httpOnly: true,
-    maxAge: 10 * 60 * 1000 // 10 хвилин
-  }
-}));
+
 
 /* ===============================
    ROUTES

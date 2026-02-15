@@ -4,12 +4,13 @@ dotenv.config();
 
 const isProd = process.env.NODE_ENV === "production";
 
-const dbUrl = isProd
-  ? process.env.MYSQL_URL  // <--- використати саме цю
-  : process.env.LOCAL_DB_URL;
+const dbUrl =
+  process.env.MYSQL_URL ||
+  process.env.PROD_DB_URL ||
+  process.env.LOCAL_DB_URL;
 
 if (!dbUrl) {
-  throw new Error("❌ Database URL not defined in .env");
+  throw new Error("Database URL not defined");
 }
 
 export const sequelize = new Sequelize(dbUrl, {

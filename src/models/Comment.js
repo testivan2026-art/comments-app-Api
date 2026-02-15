@@ -34,6 +34,11 @@ export const Comment = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: false,
     },
+
+    ip: {
+  type: DataTypes.STRING(45),
+  allowNull: true,
+},
   },
   {
     tableName: 'comments',

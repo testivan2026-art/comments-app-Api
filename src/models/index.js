@@ -2,6 +2,7 @@ import {sequelize}from '../../config/db.js';
 import { User } from './User.js';
 import { Comment } from './Comment.js';
 import { File } from './File.js';
+import { Captcha } from './Captcha.js';
 
 // relations
 User.hasMany(Comment, {
@@ -24,4 +25,4 @@ Comment.belongsTo(Comment, {
 Comment.hasMany(File, { foreignKey: 'comment_id' });
 File.belongsTo(Comment, { foreignKey: 'comment_id' });
 
-export { sequelize, User, Comment, File };
+export { sequelize, User, Comment, File, Captcha };

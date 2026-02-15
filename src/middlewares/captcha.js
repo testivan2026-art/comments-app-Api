@@ -1,20 +1,29 @@
-export const checkCaptcha = (req, res, next) => {
+import crypto from 'crypto';
+import { Captcha } from '../models/index.js';
 
-  const { captcha } = req.body;
+export const checkCaptcha = async (req, res, next) => {
+  const { captcha, captchaId } = req.body;
 
-  if (!captcha) {
+  if (!captcha || !captchaId) {
     return res.status(400).json({ message: 'CAPTCHA is required' });
   }
 
-  if (!req.session.captcha) {
+  const record = await Captcha.findByPk(captchaId);
+
+  if (!record) {
     return res.status(400).json({ message: 'CAPTCHA expired' });
   }
 
-  if (captcha !== req.session.captcha) {
+  const hash = crypto
+    .createHash('sha256')
+    .update(captcha.toLowerCase())
+    .digest('hex');
+
+  if (hash !== record.hash) {
     return res.status(400).json({ message: 'Invalid CAPTCHA' });
   }
 
-  delete req.session.captcha; // одноразова captcha
+  await record.destroy(); // одноразова
 
   next();
 };

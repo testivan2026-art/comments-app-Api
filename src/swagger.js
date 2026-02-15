@@ -1,6 +1,5 @@
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
-import { url } from 'zod';
 
 const options = {
   definition: {
@@ -13,11 +12,13 @@ const options = {
     servers: [
       {
         url: 'http://localhost:3000',
+      },
+      {
         url: 'https://comments-app.onrender.com',
       },
     ],
   },
-  apis: ['./src/routes/*.js'], // Шляхи до файлів з JSDoc коментарями
+  apis: ['./src/routes/*.js'],
 };
 
 const swaggerSpec = swaggerJSDoc(options);
