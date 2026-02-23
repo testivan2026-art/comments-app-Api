@@ -1,7 +1,7 @@
-FROM node:20
+FROM node:20-alpine
 
-# Встановлюємо MySQL клієнт для wait-for-db.sh
-RUN apt-get update && apt-get install -y default-mysql-client && rm -rf /var/lib/apt/lists/*
+# Встановлюємо mysql-client для wait-for-db
+RUN apk add --no-cache mysql-client
 
 WORKDIR /app
 
@@ -12,4 +12,4 @@ COPY . .
 
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+CMD ["sh", "./wait-for-db.sh"]

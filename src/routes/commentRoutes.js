@@ -23,15 +23,43 @@ import { commentLimiter } from "../middlewares/rateLimit.js";
 
 const router = express.Router();
 
-/* ===========================
-   READ
-=========================== */
+/**
+ * @swagger
+ * tags:
+ *   name: Comments
+ *   description: Comments management
+ */
 
 /**
  * @swagger
  * /comments:
  *   get:
  *     summary: Get paginated comments
+ *     tags: [Comments]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: sort
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of comments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CommentListResponse'
  */
 router.get("/", getComments);
 
@@ -40,6 +68,26 @@ router.get("/", getComments);
  * /comments/{id}:
  *   get:
  *     summary: Get comment by ID
+ *     tags: [Comments]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Comment object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Comment'
+ *       404:
+ *         description: Comment not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get("/:id", getComment);
 
@@ -48,18 +96,31 @@ router.get("/:id", getComment);
  * /comments/{id}/files:
  *   get:
  *     summary: Get files of comment
+ *     tags: [Comments]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Files list
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/File'
  */
 router.get("/:id/files", getCommentFiles);
-
-/* ===========================
-   CREATE (JSON)
-=========================== */
 
 /**
  * @swagger
  * /comments:
  *   post:
  *     summary: Create comment (JSON)
+ *     tags: [Comments]
  *     requestBody:
  *       required: true
  *       content:
@@ -85,6 +146,18 @@ router.get("/:id/files", getCommentFiles);
  *                 type: string
  *               captchaId:
  *                 type: string
+ *                 format: uuid
+ *     responses:
+ *       201:
+ *         description: Comment created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Comment'
+ *       400:
+ *         description: Validation error
+ *       403:
+ *         description: Invalid captcha
  */
 router.post(
   "/",
@@ -95,43 +168,12 @@ router.post(
   createComment
 );
 
-/* ===========================
-   CREATE (WITH FILE)
-=========================== */
-
 /**
  * @swagger
  * /comments/with-file:
  *   post:
  *     summary: Create comment with file
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             required:
- *               - username
- *               - email
- *               - text
- *               - captcha
- *               - captchaId
- *             properties:
- *               username:
- *                 type: string
- *               email:
- *                 type: string
- *               text:
- *                 type: string
- *               parent_id:
- *                 type: integer
- *               captcha:
- *                 type: string
- *               captchaId:
- *                 type: string
- *               file:
- *                 type: string
- *                 format: binary
+ *     tags: [Comments]
  */
 router.post(
   "/with-file",
@@ -145,21 +187,7 @@ router.post(
   createComment
 );
 
-/* ===========================
-   UPDATE
-=========================== */
-
-router.patch(
-  "/:id",
-  validateZod(updateCommentSchema),
-  sanitizeText,
-  updateComment
-);
-
-/* ===========================
-   DELETE
-=========================== */
-
+router.patch("/:id", validateZod(updateCommentSchema), sanitizeText, updateComment);
 router.delete("/:id", deleteComment);
 
 export default router;

@@ -44,6 +44,7 @@ comments-app-api/
 │   │   └── validateZod.js
 │   │
 │   ├── models/
+│   │   ├── Captcha.js
 │   │   ├── Comment.js
 │   │   ├── File.js
 │   │   ├── User.js

@@ -3,13 +3,14 @@ export const validateZod = (schema) => (req, res, next) => {
 
   if (!result.success) {
     return res.status(400).json({
-      errors: result.error.issues.map(issue => ({
-        path: issue.path.join('.'),
-        message: issue.message
-      }))
+      status: "error",
+      errors: result.error.issues.map((issue) => ({
+        field: issue.path.join("."),
+        message: issue.message,
+      })),
     });
   }
 
-  req.body = result.data; 
+  req.body = result.data;
   next();
 };
