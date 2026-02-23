@@ -1,7 +1,7 @@
 {
   "name": "comments-app",
   "version": "1.0.0",
-  "description": "",
+  "description": "Production-ready comments app backend",
   "main": "server.js",
   "type": "module",
   "scripts": {
@@ -12,13 +12,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "body-parser": "^2.2.2",
     "cors": "^2.8.6",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
-    "express-validator": "^7.3.1",
+    "helmet": "^8.1.0",
     "mariadb": "^3.4.5",
+    "morgan": "^1.10.1",
     "multer": "^2.0.2",
     "mysql2": "^3.17.0",
     "pg": "^8.18.0",

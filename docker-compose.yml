@@ -32,22 +32,7 @@ services:
       - mariadb
     volumes:
       - ./uploads:/app/uploads
-      - ./src:/app/src
-      - ./wait-for-db.sh:/app/wait-for-db.sh
     command: ["./wait-for-db.sh"]
-
-  frontend:
-    build:
-      context: ../comments-app-frontend
-      dockerfile: Dockerfile
-    container_name: comments-frontend
-    restart: always
-    ports:
-      - "3001:5173"
-    environment:
-      VITE_API_URL: http://localhost:3000
-    depends_on:
-      - backend
 
 volumes:
   db_data:
